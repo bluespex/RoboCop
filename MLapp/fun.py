@@ -4,8 +4,7 @@ import os.path
 import pickle
 import face_recognition as fr
 from sklearn.neighbors import KNeighborsClassifier
-import cv2
-# from imutils import paths   
+import cv2 
 
 def train(train_dir,model_save_path='trained_knn_model.clf',n_neighbors=3,knn_algo='ball_tree'):
 
@@ -22,6 +21,7 @@ def train(train_dir,model_save_path='trained_knn_model.clf',n_neighbors=3,knn_al
             image = cv2.imread(image_path)
             rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
             boxes = fr.face_locations(rgb,model="hog")
+            # Histogram of Oriented Gradients
             encodings = fr.face_encodings(rgb, boxes)
             # loop over the encodings
             for encoding in encodings:
@@ -67,9 +67,36 @@ def predict(x_img_path,knn_clf=None,model_path='trained_knn_model.clf',distance_
     # print(list(zip(knn_clf.predict(encodings),x_face_location,are_matches)))
     # return are_matches
 
+def validate(test_dir,knn_clf=None,model_path='trained_knn_model.clf'):
+    if knn_clf is None:
+        with open(model_path,'rb') as f: 
+            knn_clf=pickle.load(f)
+
+    x = []
+    y = []
+    for class_dir in os.listdir(test_dir):
+        if not os.path.isdir(os.path.join(test_dir,class_dir)):
+            continue
+
+        folderPath = os.path.join(test_dir,class_dir)
+        for image_name in os.listdir(folderPath):
+            image_path = os.path.join(folderPath,image_name)
+            image = cv2.imread(image_path)
+            rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+            boxes = fr.face_locations(rgb,model="hog")
+            encodings = fr.face_encodings(rgb, boxes)
+            # loop over the encodings
+            for encoding in encodings:
+                x.append(encoding)
+                y.append(class_dir)
+
+    print("Accuracy of the model : ")
+    print(knn_clf.score(x, y))
 
 
 if __name__ == '__main__':
     # print(os.getcwd());
     # predict("2.jpg")
-    train(os.getcwd() + '\dataset')
+    # print(os.getcwd() + '\dataset')
+    # train(os.getcwd() + '\dataset')
+    validate(os.getcwd() + '\\validate')
