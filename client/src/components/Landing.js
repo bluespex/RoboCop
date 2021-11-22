@@ -11,7 +11,7 @@ export default class Landing extends Component {
         <Paper className="image" elevation={3}>
           <h1>Robo Cop</h1>
 
-          <h4>AI project</h4>
+          <h4>A web tool to help find missing people using AI</h4>
           <br />
           <br />
           <br />
